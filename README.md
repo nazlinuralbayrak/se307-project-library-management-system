@@ -55,10 +55,10 @@ flask --app app run
 
 | Member | Main responsibilities | Main files / parts |
 |---|---|---|
-| @nazlinuralbayrak | Database schema, data access, synthetic data | `src/database.py`, `data/` |
-| @MehmetAlikkk | OOP models, loan/return rules, due dates, late fines | `src/models.py` |
-| @yamanbalci | Flask interface, user roles, search, reservations queue | `app.py`, `templates/` |
-| @Sirmen3410 | Statistics dashboard, simulated e-mail notifications, notebook, reports | `src/analytics.py`, `src/notifications.py`, `notebooks/` |
+| @nazlinuralbayrak | Database schema, models (OOP), synthetic data population | `src/models.py`, `src/database.py`, `data/sample_books.csv` |
+| @MehmetAlikkk | Authentication, user roles (librarian/member), session management | `src/auth.py`, `templates/login.html`, `templates/register.html` |
+| @yamanbalci | Book catalogue search, loan & return logic, statistics dashboard | `src/loan_service.py`, `templates/books.html`, `templates/dashboard.html` |
+| @Sirmen3410 | Overdue check logic, simulated e-mail notifications, log filtering | `src/notification_service.py`, `templates/notifications.html` |
 
 Every member commits their own work from their own GitHub account.
 
@@ -66,11 +66,11 @@ Every member commits their own work from their own GitHub account.
 
 | What | Used for | Where |
 |---|---|---|
-| Flask | Web interface | `app.py`, `templates/` |
-| SQLite3 | Database | `src/database.py` |
-| pandas, Matplotlib | Statistics and charts | `src/analytics.py` |
-| pytest | Tests | `tests/` |
-| AI assistant (Claude) | Project guidance, setup help, drafting | to be completed |
+| Flask | Web interface and routing | `app.py`, `templates/` |
+| SQLite3 | Relational database storage | `src/database.py` |
+| pandas, Matplotlib | Statistics and dashboard charts | `src/loan_service.py`, `templates/dashboard.html` |
+| pytest | Unit testing core rules | `tests/` |
+| AI assistant (Gemini) | Project guidance, architectural setup, Git troubleshooting, drafting | Project structure, notebook drafting |
 
 ## Reports and video
 
