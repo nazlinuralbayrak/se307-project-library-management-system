@@ -4,18 +4,18 @@ import os
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "library.db")
 
 def get_connection():
-    """SQLite veritabanı bağlantısı oluşturur ve satırları sözlük gibi döndürür."""
+    """Connect to the SQLite database and returns rows as dictionaries."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
-    """Veritabanı tablolarını sıfırdan oluşturur."""
+    """Initialize the database and create tables."""
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = get_connection()
     cursor = conn.cursor()
 
-    # 1. Üyeler Tablosu (Kişisel veri içermez, roller: member veya librarian)
+    # 1. Table of members
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS members (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +26,7 @@ def init_db():
     );
     """)
 
-    # 2. Kitaplar Tablosu
+    # 2. Table of books
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS books (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +38,7 @@ def init_db():
     );
     """)
 
-    # 3. Ödünç İşlemleri Tablosu
+    # 3. Table of loans
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS loans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +53,7 @@ def init_db():
     );
     """)
 
-    # 4. Bildirim Log Tablosu (4. üyenin hocadan onay aldığı şartlar için)
+    # 4. Table of notifications
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,7 +72,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    print("Veritabanı ve tablolar başarıyla oluşturuldu.")
+    print("Database and tables initialized successfully.")
 
 if __name__ == "__main__":
     init_db()
