@@ -1,0 +1,11 @@
+title,author,isbn,total_copies,available_copies
+Clean Code,Robert C. Martin,978-0132350884,4,4
+Python Crash Course,Eric Matthes,978-1593279288,3,3
+Introduction to Algorithms,Thomas H. Cormen,978-0262033848,2,2
+Design Patterns,Erich Gamma,978-0201633610,3,3
+The Pragmatic Programmer,Andrew Hunt,978-0135957059,5,5
+Fluent Python,Luciano Ramalho,978-1491946008,3,3
+Database System Concepts,Abraham Silberschatz,978-0078022159,2,2
+Artificial Intelligence: A Modern Approach,Stuart Russell,978-0136042594,2,2
+Computer Networking: A Top-Down Approach,James Kurose,978-0133594140,4,4
+Automate the Boring Stuff with Python,Al Sweigart,978-1593275990,5,5
