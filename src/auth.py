@@ -120,7 +120,7 @@ def logout():
 @auth_bp.route("/profile")
 @login_required
 def profile():
-    """Temporary page to check the session works."""
+    """Show the logged-in user (placeholder until the dashboard exists)."""
     return (f"Logged in as {session['name']} "
             f"(role: {session['role']}). <a href='/logout'>Logout</a>")
 
@@ -128,5 +128,5 @@ def profile():
 @auth_bp.route("/admin-test")
 @role_required("librarian")
 def admin_test():
-    """Temporary page to check role protection works."""
+    """Librarian-only demo page used to check role protection."""
     return "Librarian area OK."
