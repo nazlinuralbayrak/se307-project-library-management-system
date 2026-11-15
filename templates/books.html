@@ -9,6 +9,17 @@
 <body class="bg-light">
     <div class="container mt-5">
         <h2 class="mb-4">Book Catalogue & Search</h2>
+        <!-- Status Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         
         <!-- Search Form -->
         <form method="GET" action="/books" class="row g-3 mb-4">
@@ -75,6 +86,42 @@
                 </table>
             </div>
         </div>
+    <!-- Active Loans Section -->
+        {% if active_loans %}
+        <div class="card shadow-sm mt-5">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">My Active Loans</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Author</th>
+                            <th>Borrow Date</th>
+                            <th>Due Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in active_loans %}
+                        <tr>
+                            <td>{{ loan['title'] }}</td>
+                            <td>{{ loan['author'] }}</td>
+                            <td>{{ loan['borrow_date'] }}</td>
+                            <td>{{ loan['due_date'] }}</td>
+                            <td>
+                                <form method="POST" action="/return/{{ loan['loan_id'] }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning">Return Book</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

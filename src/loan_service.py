@@ -35,3 +35,100 @@ def search_books(query="", category=""):
     books = cursor.fetchall()
     conn.close()
     return books
+
+from datetime import datetime, timedelta
+
+MAX_BORROW_LIMIT = 3
+LOAN_DURATION_DAYS = 14
+
+def get_member_active_loans(member_id):
+    """Returns a list of currently borrowed (unreturned) books for a specific member."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT loans.id AS loan_id, books.id AS book_id, books.title, books.author, 
+               loans.borrow_date, loans.due_date
+        FROM loans
+        JOIN books ON loans.book_id = books.id
+        WHERE loans.member_id = ? AND loans.return_date IS NULL
+    """
+    cursor.execute(query, (member_id,))
+    active_loans = cursor.fetchall()
+    conn.close()
+    return active_loans
+
+def borrow_book(member_id, book_id):
+    """
+    Processes a book loan request.
+    Checks book availability and member's maximum active loan limit.
+    Returns a tuple: (success: bool, message: str)
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # 1. Check if the book exists and is available
+    cursor.execute("SELECT available FROM books WHERE id = ?", (book_id,))
+    book = cursor.fetchone()
+    
+    if not book:
+        conn.close()
+        return False, "Book not found."
+        
+    if not book["available"]:
+        conn.close()
+        return False, "This book is currently unavailable."
+        
+    # 2. Check if the member reached the maximum borrow limit
+    cursor.execute(
+        "SELECT COUNT(*) AS count FROM loans WHERE member_id = ? AND return_date IS NULL",
+        (member_id,)
+    )
+    active_count = cursor.fetchone()["count"]
+    
+    if active_count >= MAX_BORROW_LIMIT:
+        conn.close()
+        return False, f"Borrow limit reached. You can borrow up to {MAX_BORROW_LIMIT} books at once."
+        
+    # 3. Create loan record and mark book as unavailable
+    borrow_date = datetime.now().strftime("%Y-%m-%d")
+    due_date = (datetime.now() + timedelta(days=LOAN_DURATION_DAYS)).strftime("%Y-%m-%d")
+    
+    cursor.execute(
+        "INSERT INTO loans (member_id, book_id, borrow_date, due_date) VALUES (?, ?, ?, ?)",
+        (member_id, book_id, borrow_date, due_date)
+    )
+    cursor.execute("UPDATE books SET available = 0 WHERE id = ?", (book_id,))
+    
+    conn.commit()
+    conn.close()
+    return True, f"Book borrowed successfully. Due date: {due_date}"
+
+def return_book(loan_id):
+    """
+    Processes a book return.
+    Updates the loan's return_date and marks the book as available again.
+    Returns a tuple: (success: bool, message: str)
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT book_id, return_date FROM loans WHERE id = ?", (loan_id,))
+    loan = cursor.fetchone()
+    
+    if not loan:
+        conn.close()
+        return False, "Loan record not found."
+        
+    if loan["return_date"] is not None:
+        conn.close()
+        return False, "This book has already been returned."
+        
+    return_date = datetime.now().strftime("%Y-%m-%d")
+    
+    cursor.execute("UPDATE loans SET return_date = ? WHERE id = ?", (return_date, loan_id))
+    cursor.execute("UPDATE books SET available = 1 WHERE id = ?", (loan["book_id"],))
+    
+    conn.commit()
+    conn.close()
+    return True, "Book returned successfully."   
