@@ -1,4 +1,7 @@
 import sqlite3
+
+import matplotlib
+matplotlib.use('Agg')
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
@@ -132,3 +135,67 @@ def return_book(loan_id):
     conn.commit()
     conn.close()
     return True, "Book returned successfully."   
+
+def get_dashboard_stats():
+    """
+    Generates library statistics and base64-encoded charts using pandas and matplotlib.
+    Returns a dictionary with summary metrics and chart image strings.
+    """
+    conn = get_db_connection()
+    
+    # Load books and loans into pandas DataFrames
+    books_df = pd.read_sql_query("SELECT * FROM books", conn)
+    loans_df = pd.read_sql_query("SELECT * FROM loans", conn)
+    conn.close()
+    
+    total_books = len(books_df)
+    available_books = int(books_df["available"].sum()) if not books_df.empty else 0
+    borrowed_books = total_books - available_books
+    total_loans = len(loans_df)
+    
+    # Chart 1: Books by Category (Bar Chart)
+    category_chart = None
+    if not books_df.empty and "category" in books_df.columns:
+        plt.figure(figsize=(6, 4))
+        category_counts = books_df["category"].value_counts()
+        category_counts.plot(kind="bar", color="#0d6efd", edgecolor="black")
+        plt.title("Books by Category")
+        plt.xlabel("Category")
+        plt.ylabel("Number of Books")
+        plt.xticks(rotation=30, ha="right")
+        plt.tight_layout()
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+        category_chart = base64.b64encode(buf.getvalue()).decode("utf-8")
+        plt.close()
+        
+    # Chart 2: Book Availability Status (Pie Chart)
+    status_chart = None
+    if total_books > 0:
+        plt.figure(figsize=(5, 4))
+        plt.pie(
+            [available_books, borrowed_books],
+            labels=["Available", "Borrowed"],
+            autopct="%1.1f%%",
+            colors=["#198754", "#6c757d"],
+            startangle=90
+        )
+        plt.title("Book Availability Ratio")
+        plt.tight_layout()
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+        status_chart = base64.b64encode(buf.getvalue()).decode("utf-8")
+        plt.close()
+        
+    return {
+        "total_books": total_books,
+        "available_books": available_books,
+        "borrowed_books": borrowed_books,
+        "total_loans": total_loans,
+        "category_chart": category_chart,
+        "status_chart": status_chart
+    }
